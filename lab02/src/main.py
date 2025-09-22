@@ -1,4 +1,4 @@
-from build_tree import generate_game_tree, print_tree
+from game_tree import generate_game_tree, print_tree
 from minimax import minimax
 from minimax_ab_pruning import minimax_ab_pruning
 
@@ -12,8 +12,8 @@ def main():
 
     root_minimax = generate_game_tree(tree_depth,children_per_node)
     root_minimax_ab_pruning = copy.deepcopy(root_minimax)
-    print("Initial tree:")
-    print_tree(root_minimax)
+    # print("Initial tree:")
+    # print_tree(root_minimax)
 
     # MiniMax
     start = time.perf_counter()
@@ -30,10 +30,16 @@ def main():
     print(f"Alpha-Beta best value: {best_value_ab}, time: {t_ab:.6f} sec")
 
     if t_minimax > 0:
-        speedup = (t_minimax - t_ab) / t_minimax * 100
+        speedup = abs((t_minimax - t_ab) / t_minimax * 100)
         print(f"Alpha-Beta is faster by {speedup:.2f}%")
     else:
         print("Timing error: minimax duration is 0")
+
+    print("minimax times called")
+    print(minimax.counter)
+    print("minimax ab pruning times called")
+    print(minimax_ab_pruning.counter)
+
 
 if __name__ == "__main__":
     main()

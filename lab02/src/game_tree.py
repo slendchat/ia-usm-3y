@@ -2,7 +2,6 @@ import numpy as np
 
 np.random.seed(1)
 
-
 # Node class for the game tree
 class Node:
     def __init__(self, value=None, player=None, children=None):
@@ -29,15 +28,10 @@ def build_weighted_tree(current_depth,max_depth,max_children_per_node,values):
     return node
 
 def print_tree(node, prefix="", is_last=True):
-    # печатаем сам узел
     connector = "└── " if is_last else "├── "
     value = node.value if node.value is not None else "None"
     print(prefix + connector + str(value) + " " + str(node.player))
-
-    # подготавливаем отступ для детей
     prefix += "    " if is_last else "│   "
-
-    # печатаем детей
     child_count = len(node.children)
     for i, child in enumerate(node.children):
         is_last_child = (i == (child_count - 1))
@@ -46,10 +40,5 @@ def print_tree(node, prefix="", is_last=True):
 def generate_game_tree(max_depth,max_children_per_node):
     shape = (1,pow(max_children_per_node,max_depth-1))
     values = np.random.randint(1,100, size=shape)[0].tolist()
-    # values = list(range(1, shape[1] + 1))
     root = build_weighted_tree(1, max_depth, max_children_per_node,values)
     return root
-
-
-
-

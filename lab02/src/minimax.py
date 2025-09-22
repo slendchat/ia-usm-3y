@@ -1,5 +1,8 @@
-
 def minimax(node, current_depth, player_name) -> float:
+    if not hasattr(minimax, "counter"):
+        minimax.counter = 0
+    minimax.counter += 1
+
     if current_depth == 1:
         return node.value
 
