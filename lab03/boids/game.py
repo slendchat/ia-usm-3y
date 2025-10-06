@@ -1,5 +1,4 @@
 import pygame as pg
-import pygame_gui
 from boid import Boid
 from config import Config, Colors
 
@@ -31,6 +30,9 @@ class Game:
 
     for b in boids:
       b.count_result_vector()
+
+    for b in boids:
+      b.update(dt)
 
   def on_render(self, dt:float, boids:list):
     self._display_surf.fill(Colors.WHITE)

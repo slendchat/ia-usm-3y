@@ -8,8 +8,8 @@ def main():
 
   boids = list()
 
-  for i in range(1,20):
-    boids.append(Boid(Vector2(randrange(20,400), randrange(20,400))))
+  for i in range(1,30):
+    boids.append(Boid(Vector2(randrange(1,800), randrange(1,600))))
 
   game = Game()
   game.init()

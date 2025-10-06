@@ -7,15 +7,16 @@ class Config:
 
   MAX_FPS:int = 60
 
-  weight_separation:float = 2.0
-  weight_alignment:float = 0.9
-  weight_coherence:float = 0.9
+  weight_separation:float = 1.5
+  weight_alignment:float = 1.0
+  weight_coherence:float = 1.5
 
-  view_radius = 50
+  view_radius: float = 80.0
 
-  max_force:int = 100
-  max_speed:int = 50
-  friction:float = 0.9
+  max_force: float = 60.0
+  max_speed: float = 250.0
+  min_speed: float = 60.0
+  friction: float = 0.98
 
   EPS = 1e-6
 
