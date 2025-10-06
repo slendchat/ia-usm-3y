@@ -17,6 +17,7 @@ class Config:
   max_speed:int = 50
   friction:float = 0.9
 
+  EPS = 1e-6
 
 @dataclass
 class Colors:

@@ -25,8 +25,12 @@ class Game:
     if event.type == pg.QUIT:
       self._running = False
 
-  def on_loop(self, dt:float):
-    pass
+  def on_loop(self, dt:float,boids:list["Boid"]):
+    for b in boids:
+      b.sense_neighbors(boids)
+
+    for b in boids:
+      b.count_result_vector()
 
   def on_render(self, dt:float, boids:list):
     self._display_surf.fill(Colors.WHITE)
@@ -43,6 +47,6 @@ class Game:
         self.on_event(event)
       dt = min(self.frames_per_sec.tick(Config.MAX_FPS) / 1000.0, 1/30)
 
-      self.on_loop(dt)
+      self.on_loop(dt, boids)
       self.on_render(dt, boids)
     self.on_cleanup()
