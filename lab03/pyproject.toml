@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "boids"
+version = "0.0.1"
+description = "example of boids algorithm in python"
+readme = "readme.md"
+requires-python = ">=3.12"
+authors = [{name = "Artur", email = "example@example.com"}]
+classifiers = [
+    "Programming Language :: Python :: 3.12"
+]
+dependencies = [
+    "pygame",
+    ]
+
+[project.urls]
+Repository = "https://github.com/slendchat/inteligenta_artificiala-usm-year03" 
+
+[tool.setuptools.packages.find]
+where = ["boids"]
+
+[project.scripts]
+boids = "boids.main:main"
