@@ -17,9 +17,11 @@ class Boid:
       return v
 
     @staticmethod
-    def _w_t(d: float, R: float) -> float:
-      t = 1.0 - d / R
-      return t if t > 0.0 else 0.1
+    def _proximity_weight(distance: float, radius: float) -> float:
+      if radius <= 0:
+        return 0.0
+      t = 1.0 - min(distance / radius, 1.0)
+      return t
 
     def __init__(self, pos: Vector2):
       self.pos: Vector2 = pos
@@ -41,54 +43,62 @@ class Boid:
           self.neighbors.append((boid, distance_sq))
 
     def _count_force_separation(self) -> Vector2:
-      steer = Vector2()
-      for other, d_sq in self.neighbors:
-        if d_sq <= Config.EPS:
-          continue
-        steer += (self.pos - other.pos) / (d_sq + Config.EPS)
-      if steer.length_squared() == 0:
-        return Vector2()
-      desired = steer.normalize() * Config.max_speed
-      return self._limit(desired - self.velocity, Config.max_force)
+      separation_sum_vector = Vector2()
+      for neighbor_boid, squared_distance in self.neighbors:
+        effective_squared_distance = max(squared_distance, Config.minimum_effective_distance_sq)
+        separation_sum_vector += (self.pos - neighbor_boid.pos) / effective_squared_distance
+      if separation_sum_vector.length_squared() == 0:
+          return Vector2()
+      desired_velocity = separation_sum_vector.normalize() * Config.max_speed
+      steering_force = desired_velocity - self.velocity
+      return self._limit(steering_force, Config.max_force)
+
 
     def _count_force_alignment(self) -> Vector2:
-      radius = Config.view_radius
-      weighted_velocity = Vector2()
-      weight_sum = 0.0
-      for other, d_sq in self.neighbors:
-        distance = d_sq ** 0.5
-        weight = self._w_t(distance, radius)
-        if weight <= 0.0:
-          continue
-        weighted_velocity += other.velocity * weight
-        weight_sum += weight
-      if weight_sum == 0.0:
-        return Vector2()
-      average_velocity = weighted_velocity / weight_sum
-      if average_velocity.length_squared() == 0.0:
-        return Vector2()
-      desired = average_velocity.normalize() * Config.max_speed
-      return self._limit(desired - self.velocity, Config.max_force)
+        radius = Config.view_radius
+        weighted_velocity_sum = Vector2()
+        weight_sum = 0.0
+        for neighbor, squared_distance in self.neighbors:
+          distance = squared_distance ** 0.5
+          weight = self._proximity_weight(distance, radius)
+          if weight <= 0.0:
+            continue
+          weighted_velocity_sum += neighbor.velocity * weight
+          weight_sum += weight
+        if weight_sum == 0.0:
+          return Vector2()
+        average_velocity = weighted_velocity_sum / weight_sum
+        if average_velocity.length_squared() == 0.0:
+          return Vector2()
+        desired_velocity = average_velocity.normalize() * Config.max_speed
+        steering_force = desired_velocity - self.velocity
+        return self._limit(steering_force, Config.max_force)
 
     def _count_force_cohesion(self) -> Vector2:
-      radius = Config.view_radius
-      center = Vector2()
-      weight_sum = 0.0
-      for other, d_sq in self.neighbors:
-        distance = d_sq ** 0.5
-        weight = self._w_t(distance, radius)
+      view_radius = Config.view_radius
+      weighted_position_sum = Vector2()
+      total_weight = 0.0
+      for neighbor, squared_distance in self.neighbors:
+        distance = squared_distance ** 0.5            # корень нужен только для веса
+        weight = self._proximity_weight(distance, view_radius)
         if weight <= 0.0:
           continue
-        center += other.pos * weight
-        weight_sum += weight
-      if weight_sum == 0.0:
+
+        weighted_position_sum += neighbor.pos * weight
+        total_weight += weight
+
+      if total_weight == 0.0:
         return Vector2()
-      center /= weight_sum
-      direction = center - self.pos
-      if direction.length_squared() == 0.0:
+
+      center_of_neighbors = weighted_position_sum / total_weight
+      to_center = center_of_neighbors - self.pos
+      if to_center.length_squared() == 0.0:
         return Vector2()
-      desired = direction.normalize() * Config.max_speed
-      return self._limit(desired - self.velocity, Config.max_force)
+
+      desired_velocity = to_center.normalize() * Config.max_speed
+      steering_force = desired_velocity - self.velocity
+      return self._limit(steering_force, Config.max_force)
+
 
     def count_result_vector(self):
       if not self.neighbors:
@@ -116,7 +126,7 @@ class Boid:
 
       speed = self.velocity.length()
       if speed < Config.min_speed:
-        if speed <= Config.EPS:
+        if speed <= Config.minimum_effective_distance_sq:
           self.velocity = Vector2(uniform(-1, 1), uniform(-1, 1))
           if self.velocity.length_squared() == 0.0:
             self.velocity = Vector2(1, 0)

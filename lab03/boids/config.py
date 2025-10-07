@@ -18,7 +18,7 @@ class Config:
   min_speed: float = 120.0
   friction: float = 0.98
 
-  EPS = 1e-6
+  minimum_effective_distance_sq: float = 1e-6
 
 @dataclass
 class Colors:
